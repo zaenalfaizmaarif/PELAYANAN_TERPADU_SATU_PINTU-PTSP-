@@ -1,0 +1,6 @@
+{
+  "name": "Layanan Satu Pintu Mediation Clinic — Bawaslu Kabupaten Subang",
+  "description": "Portal Layanan Satu Pintu Permintaan Layanan Konsultasi Mediation Clinic (Formulir MC-01) Badan Pengawas Pemilihan Umum Kabupaten Subang.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
