@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { Lock, UserCheck, Eye, EyeOff, KeyRound, ShieldCheck } from 'lucide-react';
+import { BAWASLU_LOGO_DATA_URI } from '../assets/bawasluLogo';
 
 export interface AuthenticatedOfficer {
   id: string;
@@ -62,29 +63,29 @@ export const OfficerLoginGate: React.FC<OfficerLoginGateProps> = ({
   };
 
   return (
-    <div className="max-w-md mx-auto bg-white border border-slate-200 rounded-xl p-6 sm:p-8">
-      <div className="mb-6">
-        <div className="flex flex-col items-center text-center gap-2.5 mb-4 pb-4 border-b border-slate-200">
+    <div className="max-w-md mx-auto bg-white border border-stone-200/90 rounded-2xl overflow-hidden shadow-sm">
+      <div className="bg-gradient-to-b from-[#7F1D1D] via-[#6B1114] to-[#4C0519] text-white px-6 py-6 border-b-2 border-amber-400/80 text-center">
+        <div className="w-16 h-16 mx-auto rounded-2xl bg-white p-2 shadow-xs border border-amber-300/60 flex items-center justify-center mb-3">
           <img
-            src="/assets/aistudio/logo_bawaslu-01_1cf173b0.png"
+            src={BAWASLU_LOGO_DATA_URI}
             alt="Logo Bawaslu Kabupaten Subang"
-            className="w-14 h-14 object-contain"
+            className="w-full h-full object-contain"
           />
-          <span className="text-xs sm:text-sm font-bold tracking-tight text-slate-900 leading-snug">
-            BADAN PENGAWAS PEMILIHAN UMUM
-            <br />
-            KABUPATEN SUBANG
-          </span>
         </div>
-        <h3 className="text-lg font-bold text-slate-900 text-center">
+        <div className="text-xs sm:text-sm font-bold tracking-tight text-amber-200 leading-snug">
+          BADAN PENGAWAS PEMILIHAN UMUM
+          <br />
+          KABUPATEN SUBANG
+        </div>
+        <h3 className="text-lg font-bold text-white mt-2">
           Masuk ke Meja Petugas PTSP
         </h3>
-        <p className="text-xs text-slate-500 mt-1 text-center">
+        <p className="text-xs text-amber-100/85 mt-1">
           Masukkan ID Pengguna atau NIP beserta Kata Sandi petugas Bawaslu Kabupaten Subang.
         </p>
       </div>
 
-      <form onSubmit={handleSubmit} className="space-y-4">
+      <form onSubmit={handleSubmit} className="p-6 sm:p-8 space-y-4">
         <div>
           <label className="block text-xs font-semibold text-slate-700 mb-1.5">
             ID Pengguna atau NIP Petugas

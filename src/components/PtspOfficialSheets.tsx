@@ -1,4 +1,5 @@
 import React from 'react';
+import { BAWASLU_LOGO_DATA_URI } from '../assets/bawasluLogo';
 import {
   PtspRecord,
   PtspFormCode,
@@ -40,7 +41,7 @@ const PtspDocumentHeader: React.FC = () => (
     <div className="grid grid-cols-12 border border-black">
       <div className="col-span-5 border-r border-black p-3 flex flex-col items-center justify-center text-center gap-1.5">
         <img
-          src="/assets/aistudio/logo_bawaslu-01_1cf173b0.png"
+          src={BAWASLU_LOGO_DATA_URI}
           alt="Logo Bawaslu Kabupaten Subang"
           className="w-12 h-12 object-contain"
         />
@@ -1062,32 +1063,32 @@ export const PtspOfficialSheets: React.FC<PtspOfficialSheetsProps> = ({
         </div>
 
         {/* B. Format Register Harian PTSP */}
-        <div className="mb-4">
+        <div className="mb-4 w-full overflow-hidden">
           <p className="font-bold text-[#2e6da4] mb-2">
             B. Format Register Harian PTSP
           </p>
-          <table className="w-full border-collapse border border-black text-[11.5px]">
+          <table className="w-full table-fixed border-collapse border border-black text-[11px]">
             <thead>
               <tr className="bg-[#1e4e79] text-white print:bg-slate-800">
-                <th className="border border-black py-1.5 px-2 text-center w-9">
+                <th className="border border-black py-1.5 px-1.5 text-center w-[6%]">
                   No.
                 </th>
-                <th className="border border-black py-1.5 px-2 text-left w-28">
+                <th className="border border-black py-1.5 px-2 text-left w-[13%]">
                   Tanggal
                 </th>
-                <th className="border border-black py-1.5 px-2 text-left w-36">
+                <th className="border border-black py-1.5 px-2 text-left w-[20%]">
                   No. Registrasi
                 </th>
-                <th className="border border-black py-1.5 px-2 text-left">
+                <th className="border border-black py-1.5 px-2 text-left w-[15%]">
                   Nama Pemohon
                 </th>
-                <th className="border border-black py-1.5 px-2 text-left">
+                <th className="border border-black py-1.5 px-2 text-left w-[18%]">
                   Jenis Layanan
                 </th>
-                <th className="border border-black py-1.5 px-2 text-left">
+                <th className="border border-black py-1.5 px-2 text-left w-[15%]">
                   Unit Tujuan
                 </th>
-                <th className="border border-black py-1.5 px-2 text-left w-24">
+                <th className="border border-black py-1.5 px-2 text-left w-[13%]">
                   Status
                 </th>
               </tr>
@@ -1106,25 +1107,25 @@ export const PtspOfficialSheets: React.FC<PtspOfficialSheetsProps> = ({
                   '-';
                 return (
                   <tr key={r.id}>
-                    <td className="border border-black py-1.5 px-2 text-center font-mono tabular-nums">
+                    <td className="border border-black py-1.5 px-1.5 text-center font-mono tabular-nums align-top">
                       {idx + 1}
                     </td>
-                    <td className="border border-black py-1.5 px-2">
+                    <td className="border border-black py-1.5 px-2 break-words align-top">
                       {r.receivedDate || r.dayAndDate}
                     </td>
-                    <td className="border border-black py-1.5 px-2 font-mono tabular-nums">
+                    <td className="border border-black py-1.5 px-2 font-mono tabular-nums break-all align-top">
                       {r.registrationNumber}
                     </td>
-                    <td className="border border-black py-1.5 px-2">
+                    <td className="border border-black py-1.5 px-2 break-words align-top">
                       {r.fullName}
                     </td>
-                    <td className="border border-black py-1.5 px-2">
+                    <td className="border border-black py-1.5 px-2 break-words align-top">
                       {srvLabel}
                     </td>
-                    <td className="border border-black py-1.5 px-2">
+                    <td className="border border-black py-1.5 px-2 break-words align-top">
                       {unitLabel}
                     </td>
-                    <td className="border border-black py-1.5 px-2">
+                    <td className="border border-black py-1.5 px-2 break-words align-top">
                       {PTSP_COMPLETION_STATUS_LABELS[r.completionStatus]}
                     </td>
                   </tr>

@@ -78,12 +78,15 @@ export const ApplicationTrackerCard: React.FC<ApplicationTrackerCardProps> = ({
   };
 
   return (
-    <div className="no-print bg-white border border-slate-200 rounded-2xl p-6 sm:p-8 shadow-xs">
+    <div className="no-print bg-gradient-to-b from-red-50/60 via-white to-amber-50/35 border border-stone-200/90 rounded-2xl p-6 sm:p-8 shadow-xs">
       <div className="max-w-2xl mx-auto text-center">
-        <h2 className="text-xl sm:text-2xl font-bold text-slate-900 tracking-tight">
+        <span className="inline-block text-[11px] font-bold uppercase tracking-wider text-red-900 bg-amber-100/80 border border-amber-300/70 px-3 py-0.5 rounded-md mb-2">
+          Pelacakan Berkas PTSP
+        </span>
+        <h2 className="text-xl sm:text-2xl font-bold text-red-950 tracking-tight">
           Lacak Status Permohonan
         </h2>
-        <p className="text-xs sm:text-sm text-slate-500 mt-1.5">
+        <p className="text-xs sm:text-sm text-slate-600 mt-1.5">
           Masukkan Nomor Resi / Pendaftaran untuk mengetahui status terkini berkas Anda.
         </p>
 
@@ -97,7 +100,7 @@ export const ApplicationTrackerCard: React.FC<ApplicationTrackerCardProps> = ({
               value={query}
               onChange={(e) => setQuery(e.target.value)}
               placeholder="Contoh: PTSP-2026-001 atau 001/PTSP/686138/XI/2026"
-              className="w-full px-4 py-3 text-sm text-slate-900 placeholder:text-slate-400 bg-white border-2 border-slate-300 focus:border-blue-600 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-600/15 transition-all"
+              className="w-full px-4 py-3 text-sm text-slate-900 placeholder:text-slate-400 bg-white border-2 border-stone-300 focus:border-red-800 rounded-xl focus:outline-none focus:ring-2 focus:ring-red-800/15 transition-all"
             />
             {query && (
               <button
@@ -113,7 +116,7 @@ export const ApplicationTrackerCard: React.FC<ApplicationTrackerCardProps> = ({
 
           <button
             type="submit"
-            className="px-6 py-3 text-sm font-bold text-white bg-slate-900 hover:bg-slate-800 rounded-xl transition-colors whitespace-nowrap shrink-0 cursor-pointer"
+            className="px-6 py-3 text-sm font-bold text-white bg-gradient-to-r from-[#7F1D1D] to-[#58111A] hover:from-red-900 hover:to-red-950 rounded-xl transition-all whitespace-nowrap shrink-0 cursor-pointer shadow-xs"
           >
             Lacak Berkas
           </button>

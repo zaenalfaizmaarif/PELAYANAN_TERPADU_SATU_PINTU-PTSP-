@@ -25,7 +25,6 @@ import { SignaturePad } from './SignaturePad';
 import { AuthenticatedOfficer } from './OfficerLoginGate';
 import {
   Printer,
-  Eye,
   Plus,
   CheckCircle2,
   Lock,
@@ -77,7 +76,6 @@ export const PtspWorkspace: React.FC<PtspWorkspaceProps> = ({
     setInternalRecordId(id);
     onChangeSelectedRecordId?.(id);
   };
-  const [showLiveSheet, setShowLiveSheet] = useState(true);
   const [noticeText, setNoticeText] = useState<string | null>(null);
 
   const isRegNumberAlreadyUsed = (
@@ -396,14 +394,14 @@ export const PtspWorkspace: React.FC<PtspWorkspaceProps> = ({
     <div className="space-y-6">
       {/* RECORD SELECTOR & ACTION TOOLBAR FOR PTSP FORMS */}
       {activeFormCode !== 'formulir_5' && (
-        <div className="no-print bg-white border border-slate-200 rounded-xl px-5 py-3.5 space-y-4">
+        <div className="no-print bg-gradient-to-r from-red-50/80 via-white to-amber-50/60 border border-red-200/80 rounded-xl px-5 py-3.5 space-y-4 shadow-2xs">
           <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4">
             <div className="flex flex-wrap items-center gap-2 text-xs text-slate-600">
-              <span className="font-bold text-slate-900">
+              <span className="font-bold text-red-950">
                 {activeFormMeta.fullTitle}
               </span>
               <span className="text-slate-400">·</span>
-              <span className="font-mono text-red-800 font-semibold">
+              <span className="font-mono text-red-900 bg-amber-100/80 border border-amber-300/70 px-2.5 py-0.5 rounded-md font-bold">
                 {currentRecord.registrationNumber}
               </span>
             </div>
@@ -415,7 +413,7 @@ export const PtspWorkspace: React.FC<PtspWorkspaceProps> = ({
                   <select
                     value={selectedRecordId}
                     onChange={(e) => setSelectedRecordId(e.target.value)}
-                    className="px-3 py-2 text-xs font-medium border border-slate-300 rounded-lg bg-white text-slate-800 focus:outline-none focus:border-red-800"
+                    className="px-3 py-2 text-xs font-medium border border-stone-300 rounded-lg bg-white text-slate-800 focus:outline-none focus:border-red-800"
                   >
                     <option value="NEW_DRAFT">
                       + Permohonan Baru ({nextRegNumber})
@@ -434,7 +432,7 @@ export const PtspWorkspace: React.FC<PtspWorkspaceProps> = ({
                       setSelectedRecordId('NEW_DRAFT');
                       setActiveFormCode('formulir_1');
                     }}
-                    className="inline-flex items-center gap-1.5 px-3 py-2 text-xs font-semibold text-slate-700 bg-slate-100 hover:bg-slate-200 rounded-lg transition-colors whitespace-nowrap shrink-0"
+                    className="inline-flex items-center gap-1.5 px-3 py-2 text-xs font-semibold text-red-900 bg-amber-50 hover:bg-amber-100 border border-amber-200 rounded-lg transition-colors whitespace-nowrap shrink-0"
                   >
                     <Plus className="w-3.5 h-3.5" />
                     Buat Pendaftaran Baru
@@ -442,30 +440,21 @@ export const PtspWorkspace: React.FC<PtspWorkspaceProps> = ({
                 </>
               )}
 
-              <button
-                type="button"
-                onClick={() => setShowLiveSheet((v) => !v)}
-                className="inline-flex items-center gap-1.5 px-3 py-2 text-xs font-medium text-slate-700 border border-slate-300 hover:bg-slate-50 rounded-lg transition-colors whitespace-nowrap shrink-0"
-              >
-                <Eye className="w-3.5 h-3.5" />
-                {showLiveSheet
-                  ? 'Sembunyikan Lembar Cetak'
-                  : 'Tampilkan Lembar Cetak'}
-              </button>
-
-              <button
-                type="button"
-                onClick={() => window.print()}
-                className="inline-flex items-center gap-1.5 px-4 py-2 text-xs font-semibold text-white bg-slate-900 hover:bg-slate-800 rounded-lg transition-colors whitespace-nowrap shrink-0"
-              >
-                <Printer className="w-3.5 h-3.5" />
-                Cetak {activeFormMeta.shortTitle}
-              </button>
+              {activeFormCode !== 'formulir_1' && (
+                <button
+                  type="button"
+                  onClick={() => window.print()}
+                  className="inline-flex items-center gap-1.5 px-4 py-2 text-xs font-semibold text-white bg-red-900 hover:bg-red-950 rounded-lg transition-colors whitespace-nowrap shrink-0"
+                >
+                  <Printer className="w-3.5 h-3.5 text-amber-300" />
+                  Cetak {activeFormMeta.shortTitle}
+                </button>
+              )}
             </div>
           </div>
 
           {(workspaceRole === 'officer' || !externalFormCode) && (
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-2.5 pt-3 border-t border-slate-200">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-2.5 pt-3 border-t border-red-200/60">
               {(workspaceRole === 'officer'
                 ? PTSP_FORM_LIST.filter(
                     (f) => f.officerOnlyEdit || f.code === 'formulir_lampiran'
@@ -480,20 +469,20 @@ export const PtspWorkspace: React.FC<PtspWorkspaceProps> = ({
                     onClick={() => setActiveFormCode(item.code)}
                     className={`p-3 rounded-lg border text-left transition-colors flex flex-col justify-between ${
                       isSelected
-                        ? 'border-red-800 bg-red-50/60 text-slate-900'
-                        : 'border-slate-200 hover:border-slate-300 text-slate-700 bg-white'
+                        ? 'border-red-800 bg-red-50/70 text-slate-900'
+                        : 'border-stone-200 hover:border-red-300 text-slate-700 bg-white'
                     }`}
                   >
                     <div>
                       <div className="flex items-center justify-between gap-1">
                         <span
                           className={`text-xs font-bold ${
-                            isSelected ? 'text-red-800' : 'text-slate-900'
+                            isSelected ? 'text-red-900' : 'text-slate-900'
                           }`}
                         >
                           {item.shortTitle}
                         </span>
-                        <span className="text-[10px] font-semibold px-1.5 py-0.5 rounded bg-red-100 text-red-800">
+                        <span className="text-[10px] font-semibold px-1.5 py-0.5 rounded bg-amber-100 text-amber-900">
                           Petugas
                         </span>
                       </div>
@@ -516,25 +505,17 @@ export const PtspWorkspace: React.FC<PtspWorkspaceProps> = ({
         </div>
       )}
 
-      {/* MAIN SPLIT WORKSPACE: INTERACTIVE FORM ON LEFT, EXACT PRINT SHEET ON RIGHT */}
-      <div
-        className={`grid grid-cols-1 ${
-          showLiveSheet ? 'xl:grid-cols-12' : ''
-        } gap-8 items-start`}
-      >
-        {/* LEFT COLUMN: INTERACTIVE FORM FOR SELECTED FORMULIR */}
-        <div
-          className={`no-print ${
-            showLiveSheet ? 'xl:col-span-6' : 'max-w-4xl mx-auto w-full'
-          } bg-white border border-slate-200 rounded-xl p-6 sm:p-8`}
-        >
+      {/* MAIN WORKSPACE: INTERACTIVE FORM */}
+      <div className="grid grid-cols-1 gap-8 items-start">
+        {/* INTERACTIVE FORM FOR SELECTED FORMULIR */}
+        <div className="no-print max-w-4xl mx-auto w-full bg-white border border-stone-200/90 rounded-xl overflow-hidden shadow-2xs">
           {/* Header of current active form */}
-          <div className="flex items-start justify-between gap-4 border-b border-slate-200 pb-4 mb-6">
+          <div className="bg-gradient-to-r from-[#7F1D1D] via-[#6B1114] to-[#4C0519] text-white px-6 sm:px-8 py-5 border-b-2 border-amber-400/80 flex items-start justify-between gap-4">
             <div>
-              <div className="text-xs font-bold uppercase tracking-wider text-red-800">
+              <div className="text-xs font-bold uppercase tracking-wider text-amber-300">
                 {activeFormMeta.shortTitle}
               </div>
-              <h3 className="text-lg font-bold text-slate-900 mt-0.5">
+              <h3 className="text-lg font-bold text-white mt-0.5">
                 {activeFormMeta.fullTitle}
               </h3>
             </div>
@@ -543,43 +524,44 @@ export const PtspWorkspace: React.FC<PtspWorkspaceProps> = ({
                 <button
                   type="button"
                   onClick={() => setDraftRecord(createEmptyDraft())}
-                  className="inline-flex items-center gap-1 text-xs font-medium text-slate-500 hover:text-slate-900 whitespace-nowrap shrink-0"
+                  className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold text-amber-100 bg-white/10 hover:bg-white/20 border border-white/20 transition-colors whitespace-nowrap shrink-0"
                 >
-                  <RotateCcw className="w-3.5 h-3.5" />
+                  <RotateCcw className="w-3.5 h-3.5 text-amber-300" />
                   Reset Isian
                 </button>
               )}
           </div>
 
-          {/* Lock notice for officer-only forms when not logged in */}
-          {isOfficerLocked && (
-            <div className="mb-6 p-4 rounded-xl bg-slate-900 text-white flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-              <div className="space-y-1">
-                <div className="flex items-center gap-2 text-xs font-bold text-amber-300">
-                  <Lock className="w-4 h-4" />
-                  <span>Khusus Petugas PTSP & Unit Kerja</span>
+          <div className="p-6 sm:p-8">
+            {/* Lock notice for officer-only forms when not logged in */}
+            {isOfficerLocked && (
+              <div className="mb-6 p-4 rounded-xl bg-gradient-to-r from-red-950 to-slate-900 text-white border border-amber-400/40 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                <div className="space-y-1">
+                  <div className="flex items-center gap-2 text-xs font-bold text-amber-300">
+                    <Lock className="w-4 h-4" />
+                    <span>Khusus Petugas PTSP &amp; Unit Kerja</span>
+                  </div>
+                  <p className="text-xs text-amber-100/85 leading-relaxed">
+                    Pengisian dan pengesahan {activeFormMeta.fullTitle} memerlukan login Meja Petugas.
+                  </p>
                 </div>
-                <p className="text-xs text-slate-300 leading-relaxed">
-                  Pengisian dan pengesahan {activeFormMeta.fullTitle} memerlukan login Meja Petugas. Anda tetap dapat melihat pratinjau dokumen di samping.
-                </p>
+                <button
+                  type="button"
+                  onClick={onRequestOfficerLogin}
+                  className="px-4 py-2 text-xs font-bold bg-amber-400 hover:bg-amber-300 text-red-950 rounded-lg transition-colors whitespace-nowrap shrink-0"
+                >
+                  Login Meja Petugas
+                </button>
               </div>
-              <button
-                type="button"
-                onClick={onRequestOfficerLogin}
-                className="px-4 py-2 text-xs font-semibold bg-red-700 hover:bg-red-800 text-white rounded-lg transition-colors whitespace-nowrap shrink-0"
-              >
-                Login Meja Petugas
-              </button>
-            </div>
-          )}
+            )}
 
-          {/* 1. PENDAFTARAN PELAYANAN PTSP */}
-          {activeFormCode === 'formulir_1' && (
-            <form onSubmit={handleSaveFormulir1} className="space-y-6">
-              <div className="space-y-4">
-                <h4 className="text-sm font-bold text-slate-900">
-                  A. Identitas Pemohon
-                </h4>
+            {/* 1. PENDAFTARAN PELAYANAN PTSP */}
+            {activeFormCode === 'formulir_1' && (
+              <form onSubmit={handleSaveFormulir1} className="space-y-6">
+                <div className="space-y-4">
+                  <h4 className="text-sm font-bold text-red-950 bg-red-50/75 border border-red-100 px-3.5 py-2 rounded-lg">
+                    A. Identitas Pemohon
+                  </h4>
 
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   <div>
@@ -753,8 +735,8 @@ export const PtspWorkspace: React.FC<PtspWorkspaceProps> = ({
               </div>
 
               {/* B. Jenis Layanan */}
-              <div className="pt-4 border-t border-slate-200 space-y-3">
-                <h4 className="text-sm font-bold text-slate-900">
+              <div className="pt-4 border-t border-stone-200 space-y-3">
+                <h4 className="text-sm font-bold text-red-950 bg-red-50/75 border border-red-100 px-3.5 py-2 rounded-lg">
                   B. Pilihan Jenis Layanan PTSP
                 </h4>
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
@@ -810,8 +792,8 @@ export const PtspWorkspace: React.FC<PtspWorkspaceProps> = ({
               </div>
 
               {/* C. Uraian Maksud dan Tujuan Pelayanan */}
-              <div className="pt-4 border-t border-slate-200 space-y-2">
-                <label className="block text-sm font-bold text-slate-900">
+              <div className="pt-4 border-t border-stone-200 space-y-2.5">
+                <label className="block text-sm font-bold text-red-950 bg-red-50/75 border border-red-100 px-3.5 py-2 rounded-lg">
                   C. Uraian Maksud dan Tujuan Pelayanan
                 </label>
                 <textarea
@@ -826,8 +808,8 @@ export const PtspWorkspace: React.FC<PtspWorkspaceProps> = ({
               </div>
 
               {/* D. Dokumen Pendukung */}
-              <div className="pt-4 border-t border-slate-200 space-y-3">
-                <h4 className="text-sm font-bold text-slate-900">
+              <div className="pt-4 border-t border-stone-200 space-y-3">
+                <h4 className="text-sm font-bold text-red-950 bg-red-50/75 border border-red-100 px-3.5 py-2 rounded-lg">
                   D. Dokumen Pendukung
                 </h4>
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
@@ -885,11 +867,11 @@ export const PtspWorkspace: React.FC<PtspWorkspaceProps> = ({
               </div>
 
               {/* E. Pernyataan & Tanda Tangan Pemohon */}
-              <div className="pt-4 border-t border-slate-200 space-y-4">
-                <h4 className="text-sm font-bold text-slate-900">
-                  E. Pernyataan & Tanda Tangan Pemohon
+              <div className="pt-4 border-t border-stone-200 space-y-4">
+                <h4 className="text-sm font-bold text-red-950 bg-red-50/75 border border-red-100 px-3.5 py-2 rounded-lg">
+                  E. Pernyataan &amp; Tanda Tangan Pemohon
                 </h4>
-                <p className="text-xs text-slate-600 bg-slate-50 border border-slate-200 rounded-lg p-3 leading-relaxed">
+                <p className="text-xs text-slate-700 bg-amber-50/60 border border-amber-200/80 rounded-lg p-3.5 leading-relaxed">
                   Saya menyatakan bahwa informasi dan dokumen yang disampaikan
                   dalam formulir ini adalah benar dan dapat
                   dipertanggungjawabkan. Saya bersedia mengikuti prosedur
@@ -907,18 +889,10 @@ export const PtspWorkspace: React.FC<PtspWorkspaceProps> = ({
 
               <div className="pt-2 flex justify-end gap-3">
                 <button
-                  type="button"
-                  onClick={() => window.print()}
-                  className="inline-flex items-center gap-1.5 px-4 py-2.5 text-xs font-semibold text-slate-700 bg-slate-100 hover:bg-slate-200 rounded-lg"
-                >
-                  <Printer className="w-4 h-4" />
-                  Cetak Pendaftaran PTSP
-                </button>
-                <button
                   type="submit"
-                  className="inline-flex items-center gap-1.5 px-5 py-2.5 text-xs font-semibold text-white bg-red-800 hover:bg-red-900 rounded-lg"
+                  className="inline-flex items-center gap-1.5 px-5 py-2.5 text-xs font-bold text-white bg-gradient-to-r from-[#7F1D1D] to-[#58111A] hover:from-red-900 hover:to-red-950 rounded-lg shadow-xs"
                 >
-                  <Save className="w-4 h-4" />
+                  <Save className="w-4 h-4 text-amber-300" />
                   Simpan Pendaftaran PTSP
                 </button>
               </div>
@@ -1628,28 +1602,28 @@ export const PtspWorkspace: React.FC<PtspWorkspaceProps> = ({
                 </button>
               </div>
 
-              <div className="overflow-x-auto border border-slate-200 rounded-lg">
-                <table className="w-full text-left border-collapse text-xs">
+              <div className="w-full overflow-hidden border border-stone-200 rounded-lg">
+                <table className="w-full table-fixed text-left border-collapse text-xs">
                   <thead>
-                    <tr className="bg-slate-50 border-b border-slate-200 text-[11px] font-semibold uppercase text-slate-500">
-                      <th className="py-2.5 px-3">No.</th>
-                      <th className="py-2.5 px-3">No. Registrasi</th>
-                      <th className="py-2.5 px-3">Pemohon</th>
-                      <th className="py-2.5 px-3">Jenis Layanan</th>
-                      <th className="py-2.5 px-3">Status</th>
-                      <th className="py-2.5 px-3 text-right">Buka</th>
+                    <tr className="bg-red-50/75 border-b border-red-200/80 text-[11px] font-bold uppercase text-red-950">
+                      <th className="py-2.5 px-3 w-[7%]">No.</th>
+                      <th className="py-2.5 px-3 w-[22%]">No. Registrasi</th>
+                      <th className="py-2.5 px-3 w-[22%]">Pemohon</th>
+                      <th className="py-2.5 px-3 w-[22%]">Jenis Layanan</th>
+                      <th className="py-2.5 px-3 w-[15%]">Status</th>
+                      <th className="py-2.5 px-3 w-[12%] text-right">Buka</th>
                     </tr>
                   </thead>
-                  <tbody className="divide-y divide-slate-200">
+                  <tbody className="divide-y divide-stone-200">
                     {records.map((r, idx) => (
-                      <tr key={r.id} className="hover:bg-slate-50">
-                        <td className="py-2.5 px-3 font-mono tabular-nums">
+                      <tr key={r.id} className="hover:bg-amber-50/40">
+                        <td className="py-2.5 px-3 font-mono tabular-nums align-top">
                           {idx + 1}
                         </td>
-                        <td className="py-2.5 px-3 font-mono tabular-nums font-semibold text-slate-900">
+                        <td className="py-2.5 px-3 font-mono tabular-nums font-bold text-red-900 break-all align-top">
                           {r.registrationNumber}
                         </td>
-                        <td className="py-2.5 px-3">
+                        <td className="py-2.5 px-3 break-words align-top">
                           <div className="font-semibold text-slate-900">
                             {r.fullName}
                           </div>
@@ -1657,24 +1631,24 @@ export const PtspWorkspace: React.FC<PtspWorkspaceProps> = ({
                             {r.receivedDate || r.dayAndDate}
                           </div>
                         </td>
-                        <td className="py-2.5 px-3">
+                        <td className="py-2.5 px-3 break-words align-top">
                           {r.serviceTypes
                             .map((s) => PTSP_SERVICE_TYPE_LABELS[s])
                             .join(', ')}
                         </td>
-                        <td className="py-2.5 px-3">
+                        <td className="py-2.5 px-3 break-words align-top">
                           {PTSP_COMPLETION_STATUS_LABELS[r.completionStatus]}
                         </td>
-                        <td className="py-2.5 px-3 text-right whitespace-nowrap">
+                        <td className="py-2.5 px-3 text-right align-top">
                           <button
                             type="button"
                             onClick={() => {
                               setSelectedRecordId(r.id);
                               setActiveFormCode('formulir_1');
                             }}
-                            className="px-2.5 py-1 text-xs font-semibold text-red-800 hover:bg-red-50 rounded"
+                            className="px-2.5 py-1 text-xs font-semibold text-red-900 bg-red-50 hover:bg-red-100 border border-red-200/80 rounded"
                           >
-                            Pilih Berkas
+                            Pilih
                           </button>
                         </td>
                       </tr>
@@ -1684,27 +1658,12 @@ export const PtspWorkspace: React.FC<PtspWorkspaceProps> = ({
               </div>
             </div>
           )}
+          </div>
         </div>
 
-        {/* RIGHT COLUMN: OFFICIAL PRINTABLE SHEET PREVIEW */}
-        {showLiveSheet && (
-          <div className="xl:col-span-6 space-y-4">
-            <div className="no-print flex items-center justify-between bg-slate-900 text-white px-4 py-3 rounded-xl">
-              <div className="text-xs">
-                <span className="font-semibold">
-                  Pratinjau Dokumen Resmi: {activeFormMeta.fullTitle}
-                </span>
-              </div>
-              <button
-                type="button"
-                onClick={() => window.print()}
-                className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold bg-white text-slate-900 rounded-md hover:bg-slate-100 transition-colors whitespace-nowrap shrink-0"
-              >
-                <Printer className="w-3.5 h-3.5" />
-                Cetak Sekarang
-              </button>
-            </div>
-
+        {/* PRINTABLE SHEET (ONLY SHOWN WHEN PRINTING FOR NON-FORMULIR 1) */}
+        {activeFormCode !== 'formulir_1' && (
+          <div className="hidden print:block">
             <PtspOfficialSheets
               formCode={activeFormCode}
               record={currentRecord}

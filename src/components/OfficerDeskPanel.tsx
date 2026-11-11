@@ -258,15 +258,15 @@ export const OfficerDeskPanel: React.FC<OfficerDeskPanelProps> = ({
   return (
     <div className="space-y-6">
       {/* Sub-navigation bar inside Meja Petugas PTSP */}
-      <div className="no-print bg-white border border-slate-200 rounded-xl p-4 flex flex-col md:flex-row md:items-center justify-between gap-4">
-        <div className="flex items-center gap-1.5 p-1 bg-slate-100 rounded-lg overflow-x-auto">
+      <div className="no-print bg-white border border-stone-200/90 rounded-xl p-3.5 flex flex-col xl:flex-row xl:items-center justify-between gap-3 shadow-2xs">
+        <div className="flex flex-wrap items-center gap-1.5 p-1 bg-stone-100 rounded-lg">
           <button
             type="button"
             onClick={() => setActiveSubTab('dashboard')}
-            className={`px-3.5 py-2 text-xs font-semibold rounded-md transition-colors whitespace-nowrap shrink-0 ${
+            className={`px-3 py-1.5 text-xs font-semibold rounded-md transition-colors whitespace-nowrap shrink-0 ${
               activeSubTab === 'dashboard'
-                ? 'bg-slate-900 text-white shadow-xs'
-                : 'text-slate-700 hover:text-slate-900'
+                ? 'bg-gradient-to-r from-[#7F1D1D] to-[#58111A] text-white shadow-xs'
+                : 'text-slate-700 hover:text-red-950'
             }`}
           >
             Dashboard Pelayanan PTSP
@@ -277,11 +277,11 @@ export const OfficerDeskPanel: React.FC<OfficerDeskPanelProps> = ({
               onChangeOfficerPtspFormCode?.('formulir_2');
               setActiveSubTab('ptsp_desk');
             }}
-            className={`px-3.5 py-2 text-xs font-semibold rounded-md transition-colors whitespace-nowrap shrink-0 ${
+            className={`px-3 py-1.5 text-xs font-semibold rounded-md transition-colors whitespace-nowrap shrink-0 ${
               activeSubTab === 'ptsp_desk' &&
               officerPtspFormCode === 'formulir_2'
-                ? 'bg-slate-900 text-white shadow-xs'
-                : 'text-slate-700 hover:text-slate-900'
+                ? 'bg-gradient-to-r from-[#7F1D1D] to-[#58111A] text-white shadow-xs'
+                : 'text-slate-700 hover:text-red-950'
             }`}
           >
             Verifikasi Petugas
@@ -292,11 +292,11 @@ export const OfficerDeskPanel: React.FC<OfficerDeskPanelProps> = ({
               onChangeOfficerPtspFormCode?.('formulir_3');
               setActiveSubTab('ptsp_desk');
             }}
-            className={`px-3.5 py-2 text-xs font-semibold rounded-md transition-colors whitespace-nowrap shrink-0 ${
+            className={`px-3 py-1.5 text-xs font-semibold rounded-md transition-colors whitespace-nowrap shrink-0 ${
               activeSubTab === 'ptsp_desk' &&
               officerPtspFormCode === 'formulir_3'
-                ? 'bg-slate-900 text-white shadow-xs'
-                : 'text-slate-700 hover:text-slate-900'
+                ? 'bg-gradient-to-r from-[#7F1D1D] to-[#58111A] text-white shadow-xs'
+                : 'text-slate-700 hover:text-red-950'
             }`}
           >
             Tanda Terima Layanan
@@ -307,11 +307,11 @@ export const OfficerDeskPanel: React.FC<OfficerDeskPanelProps> = ({
               onChangeOfficerPtspFormCode?.('formulir_4');
               setActiveSubTab('ptsp_desk');
             }}
-            className={`px-3.5 py-2 text-xs font-semibold rounded-md transition-colors whitespace-nowrap shrink-0 ${
+            className={`px-3 py-1.5 text-xs font-semibold rounded-md transition-colors whitespace-nowrap shrink-0 ${
               activeSubTab === 'ptsp_desk' &&
               officerPtspFormCode === 'formulir_4'
-                ? 'bg-slate-900 text-white shadow-xs'
-                : 'text-slate-700 hover:text-slate-900'
+                ? 'bg-gradient-to-r from-[#7F1D1D] to-[#58111A] text-white shadow-xs'
+                : 'text-slate-700 hover:text-red-950'
             }`}
           >
             Monitoring Pelayanan
@@ -322,11 +322,11 @@ export const OfficerDeskPanel: React.FC<OfficerDeskPanelProps> = ({
               onChangeOfficerPtspFormCode?.('formulir_lampiran');
               setActiveSubTab('ptsp_desk');
             }}
-            className={`px-3.5 py-2 text-xs font-semibold rounded-md transition-colors whitespace-nowrap shrink-0 ${
+            className={`px-3 py-1.5 text-xs font-semibold rounded-md transition-colors whitespace-nowrap shrink-0 ${
               activeSubTab === 'ptsp_desk' &&
               officerPtspFormCode === 'formulir_lampiran'
-                ? 'bg-slate-900 text-white shadow-xs'
-                : 'text-slate-700 hover:text-slate-900'
+                ? 'bg-gradient-to-r from-[#7F1D1D] to-[#58111A] text-white shadow-xs'
+                : 'text-slate-700 hover:text-red-950'
             }`}
           >
             Pedoman &amp; Register PTSP
@@ -340,9 +340,9 @@ export const OfficerDeskPanel: React.FC<OfficerDeskPanelProps> = ({
               setPasswordStatus(null);
               setShowPasswordModal(true);
             }}
-            className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold text-slate-700 hover:text-slate-900 bg-slate-100 hover:bg-slate-200 rounded-lg transition-colors whitespace-nowrap shrink-0"
+            className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold text-red-900 bg-amber-50 hover:bg-amber-100 border border-amber-200 rounded-lg transition-colors whitespace-nowrap shrink-0"
           >
-            <KeyRound className="w-3.5 h-3.5" />
+            <KeyRound className="w-3.5 h-3.5 text-red-800" />
             Ubah Kata Sandi Petugas
           </button>
         </div>
@@ -364,27 +364,30 @@ export const OfficerDeskPanel: React.FC<OfficerDeskPanelProps> = ({
       {activeSubTab === 'dashboard' && (
         <div className="no-print space-y-6">
           {/* Page Header */}
-          <div>
-            <h1 className="text-2xl font-bold tracking-tight text-slate-900">
+          <div className="bg-gradient-to-r from-[#7F1D1D] via-[#6B1114] to-[#4C0519] text-white rounded-xl p-6 border-b-2 border-amber-400/80 shadow-xs">
+            <span className="inline-block text-[11px] font-bold uppercase tracking-wider text-amber-300 mb-1">
+              Meja Petugas PTSP · Bawaslu Kabupaten Subang
+            </span>
+            <h1 className="text-xl sm:text-2xl font-bold tracking-tight text-white">
               Dashboard Pelayanan Terpadu Satu Pintu (PTSP) Bawaslu Subang
             </h1>
-            <p className="text-sm text-slate-500 mt-1">
+            <p className="text-xs sm:text-sm text-amber-100/85 mt-1">
               Ringkasan permohonan pelayanan publik, monitoring tindak lanjut unit kerja, dan capaian kepuasan masyarakat Bawaslu Kabupaten Subang.
             </p>
           </div>
 
           {/* 3-Column Register & Service Metrics Strip (Exclusive to Meja Petugas) */}
-          <div className="bg-white border border-slate-200 rounded-xl px-6 py-4 grid grid-cols-1 sm:grid-cols-3 gap-6">
+          <div className="bg-gradient-to-r from-amber-50/70 via-white to-red-50/50 border border-amber-200/80 rounded-xl px-6 py-4 grid grid-cols-1 sm:grid-cols-3 gap-6">
             <div>
-              <div className="text-xs text-slate-500">
+              <div className="text-xs text-slate-600">
                 Kode Register Bawaslu Subang
               </div>
-              <div className="text-base font-bold font-mono tabular-nums text-slate-900 mt-0.5">
+              <div className="text-base font-bold font-mono tabular-nums text-red-950 mt-0.5">
                 /PTSP/686138/2026
               </div>
             </div>
             <div>
-              <div className="text-xs text-slate-500">
+              <div className="text-xs text-slate-600">
                 Total Permohonan Tercatat
               </div>
               <div className="text-base font-bold font-mono tabular-nums text-slate-900 mt-0.5">
@@ -392,7 +395,7 @@ export const OfficerDeskPanel: React.FC<OfficerDeskPanelProps> = ({
               </div>
             </div>
             <div>
-              <div className="text-xs text-slate-500">Diproses &amp; Selesai</div>
+              <div className="text-xs text-slate-600">Diproses &amp; Selesai</div>
               <div className="text-base font-bold font-mono tabular-nums text-emerald-700 mt-0.5">
                 {dashboardStats.inProgressPtsp + dashboardStats.donePtsp} Layanan
               </div>
@@ -521,9 +524,9 @@ export const OfficerDeskPanel: React.FC<OfficerDeskPanelProps> = ({
               </div>
 
               <div className="flex flex-wrap items-center gap-2.5 shrink-0">
-                <div className="px-3.5 py-2 rounded-lg bg-slate-900 text-white flex items-center gap-2.5">
+                <div className="px-3.5 py-2 rounded-lg bg-gradient-to-r from-[#7F1D1D] to-[#58111A] text-white flex items-center gap-2.5 shadow-2xs">
                   <div className="text-right">
-                    <div className="text-[10px] uppercase tracking-wider text-slate-300 font-semibold">
+                    <div className="text-[10px] uppercase tracking-wider text-amber-200 font-semibold">
                       Indeks Kinerja Sistem (IKM)
                     </div>
                     <div className="text-sm font-bold font-mono tabular-nums">

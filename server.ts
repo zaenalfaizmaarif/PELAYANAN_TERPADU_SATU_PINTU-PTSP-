@@ -14,6 +14,7 @@ import {
   PTSP_SERVICE_TYPE_LABELS,
 } from './src/types/ptsp.ts';
 import type { PtspRecord, PtspSurveyEntry } from './src/types/ptsp.ts';
+import { BAWASLU_LOGO_DATA_URI } from './src/assets/bawasluLogo.ts';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -57,6 +58,7 @@ const MYSQL_CONFIG = {
 };
 
 let mysqlPool: Pool | null = null;
+let mysqlInitAttempted = false;
 
 function hashPassword(password: string, salt: string): string {
   return crypto.scryptSync(password, salt, 64).toString('hex');
@@ -238,7 +240,10 @@ async function insertSurveyToMySql(
   );
 }
 
-async function initXamppMySql(): Promise<void> {
+async function initXamppMySql(): Promise<Pool | null> {
+  if (mysqlPool) return mysqlPool;
+  if (mysqlInitAttempted) return null;
+  mysqlInitAttempted = true;
   try {
     // 1. Connect to XAMPP MySQL server to ensure database exists
     const bootstrapConn = await mysql.createConnection({
@@ -246,7 +251,7 @@ async function initXamppMySql(): Promise<void> {
       port: MYSQL_CONFIG.port,
       user: MYSQL_CONFIG.user,
       password: MYSQL_CONFIG.password,
-      connectTimeout: 2500,
+      connectTimeout: 1000,
     });
 
     await bootstrapConn.query(
@@ -341,11 +346,13 @@ async function initXamppMySql(): Promise<void> {
     console.log(
       `[XAMPP MySQL] Terhubung ke database '${MYSQL_CONFIG.database}' di ${MYSQL_CONFIG.host}:${MYSQL_CONFIG.port}`
     );
-  } catch {
+    return mysqlPool;
+  } catch (err) {
     mysqlPool = null;
     console.log(
-      `[Penyimpanan Lokal] XAMPP MySQL (${MYSQL_CONFIG.host}:${MYSQL_CONFIG.port}) belum aktif — menggunakan penyimpanan lokal (.data/ptsp_store.json).`
+      `[Penyimpanan Lokal] XAMPP MySQL (${MYSQL_CONFIG.host}:${MYSQL_CONFIG.port}) belum terhubung (${(err as Error)?.message || 'offline'}) — menggunakan penyimpanan lokal (.data/ptsp_store.json).`
     );
+    return null;
   }
 }
 
@@ -422,12 +429,27 @@ function sqlEscape(val: string): string {
 }
 
 async function startServer() {
-  await initXamppMySql();
-
   const app = express();
   const PORT = 3000;
 
+  void initXamppMySql();
+
   app.use(express.json({ limit: '5mb' }));
+
+  // Serve embedded Bawaslu logo even when /public/assets/aistudio is missing in exported ZIP
+  app.get(
+    '/assets/aistudio/logo_bawaslu-01_1cf173b0.png',
+    (_req: Request, res: Response) => {
+      const b64 = BAWASLU_LOGO_DATA_URI.replace(
+        /^data:image\/png;base64,/,
+        ''
+      );
+      const buf = Buffer.from(b64, 'base64');
+      res.setHeader('Content-Type', 'image/png');
+      res.setHeader('Cache-Control', 'public, max-age=31536000');
+      res.send(buf);
+    }
+  );
 
   // --- AUTHENTICATION API ROUTES ---
 
@@ -591,9 +613,10 @@ async function startServer() {
   // --- PTSP RECORDS & SURVEYS API ROUTES (XAMPP MYSQL + LOCAL FALLBACK) ---
 
   app.get('/api/ptsp/records', async (_req: Request, res: Response) => {
-    if (mysqlPool) {
+    const pool = mysqlPool || (await initXamppMySql());
+    if (pool) {
       try {
-        const [rows] = await mysqlPool.query<RowDataPacket[]>(
+        const [rows] = await pool.query<RowDataPacket[]>(
           'SELECT record_json FROM ptsp_records ORDER BY created_at DESC'
         );
         const records = rows.map(
@@ -622,9 +645,10 @@ async function startServer() {
     ];
     saveStore(store);
 
-    if (mysqlPool) {
+    const pool = mysqlPool || (await initXamppMySql());
+    if (pool) {
       try {
-        await upsertRecordToMySql(mysqlPool, incoming);
+        await upsertRecordToMySql(pool, incoming);
       } catch (err) {
         console.error('MySQL insert record error:', err);
       }
@@ -649,9 +673,10 @@ async function startServer() {
     }
     saveStore(store);
 
-    if (mysqlPool) {
+    const pool = mysqlPool || (await initXamppMySql());
+    if (pool) {
       try {
-        await upsertRecordToMySql(mysqlPool, updated);
+        await upsertRecordToMySql(pool, updated);
       } catch (err) {
         console.error('MySQL update record error:', err);
       }
@@ -661,9 +686,10 @@ async function startServer() {
   });
 
   app.get('/api/ptsp/surveys', async (_req: Request, res: Response) => {
-    if (mysqlPool) {
+    const pool = mysqlPool || (await initXamppMySql());
+    if (pool) {
       try {
-        const [rows] = await mysqlPool.query<RowDataPacket[]>(
+        const [rows] = await pool.query<RowDataPacket[]>(
           'SELECT survey_json FROM ptsp_surveys ORDER BY created_at DESC'
         );
         const surveys = rows.map(
@@ -692,9 +718,10 @@ async function startServer() {
     ];
     saveStore(store);
 
-    if (mysqlPool) {
+    const pool = mysqlPool || (await initXamppMySql());
+    if (pool) {
       try {
-        await insertSurveyToMySql(mysqlPool, incoming);
+        await insertSurveyToMySql(pool, incoming);
       } catch (err) {
         console.error('MySQL insert survey error:', err);
       }
@@ -811,8 +838,9 @@ async function startServer() {
 
   // Vite middleware for development vs static serving for production
   if (process.env.NODE_ENV !== 'production') {
+    process.env.DISABLE_HMR = 'true';
     const vite = await createViteServer({
-      server: { middlewareMode: true },
+      server: { middlewareMode: true, hmr: false },
       appType: 'spa',
     });
     app.use(vite.middlewares);
@@ -824,11 +852,37 @@ async function startServer() {
     });
   }
 
-  app.listen(PORT, '0.0.0.0', () => {
-    console.log(
-      `Server PTSP Bawaslu Kabupaten Subang berjalan pada http://0.0.0.0:${PORT}`
-    );
-  });
+  const startListening = (portToTry: number) => {
+    const httpServer = app.listen(portToTry, '0.0.0.0', () => {
+      console.log(
+        `\n==================================================================`
+      );
+      console.log(
+        `Server PTSP Bawaslu Kabupaten Subang berhasil berjalan!`
+      );
+      console.log(
+        `Buka di Browser Anda: http://localhost:${portToTry}`
+      );
+      console.log(
+        `==================================================================\n`
+      );
+    });
+
+    httpServer.on('error', (err: NodeJS.ErrnoException) => {
+      if (err.code === 'EADDRINUSE' && portToTry < 3010) {
+        console.log(
+          `[INFO] Port ${portToTry} sedang terpakai, mengalihkan otomatis ke port ${
+            portToTry + 1
+          }...`
+        );
+        startListening(portToTry + 1);
+      } else {
+        console.error('Gagal menjalankan server:', err.message);
+      }
+    });
+  };
+
+  startListening(PORT);
 }
 
 startServer();
