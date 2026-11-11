@@ -274,16 +274,22 @@ export const PtspWorkspace: React.FC<PtspWorkspaceProps> = ({
 
   const handleSaveOtherForm = (e: React.FormEvent, formLabel: string) => {
     e.preventDefault();
+    const recordToSave: PtspRecord =
+      activeFormCode === 'formulir_2' &&
+      currentRecord.completionStatus === 'menunggu_verifikasi'
+        ? { ...currentRecord, completionStatus: 'dalam_proses' }
+        : currentRecord;
+
     if (effectiveSelectedId === 'NEW_DRAFT') {
       const syncedRegNumber = isRegNumberAlreadyUsed(
-        currentRecord.registrationNumber,
+        recordToSave.registrationNumber,
         records
       )
         ? nextRegNumber
-        : currentRecord.registrationNumber;
+        : recordToSave.registrationNumber;
 
       const savedRec: PtspRecord = {
-        ...currentRecord,
+        ...recordToSave,
         id: `PTSP-2026-${String(records.length + 1).padStart(3, '0')}`,
         registrationNumber: syncedRegNumber,
         createdAt: new Date().toISOString(),
@@ -293,10 +299,10 @@ export const PtspWorkspace: React.FC<PtspWorkspaceProps> = ({
         setSelectedRecordId(savedRec.id);
       }
     } else {
-      onUpdateRecord(currentRecord);
+      onUpdateRecord(recordToSave);
     }
     setNoticeText(
-      `Data ${formLabel} (${currentRecord.registrationNumber}) berhasil disimpan.`
+      `Data ${formLabel} (${recordToSave.registrationNumber}) berhasil disimpan.`
     );
     setTimeout(() => setNoticeText(null), 4000);
   };

@@ -48,6 +48,42 @@ interface StoreData {
 const DATA_DIR = path.join(__dirname, '.data');
 const STORE_PATH = path.join(DATA_DIR, 'ptsp_store.json');
 
+// Supabase Configuration (via REST API when SUPABASE_URL & SUPABASE_ANON_KEY are set in .env)
+const SUPABASE_URL = (
+  process.env.SUPABASE_URL ||
+  process.env.VITE_SUPABASE_URL ||
+  process.env.NEXT_PUBLIC_SUPABASE_URL ||
+  'https://mtcfzbaelbjpmvearlmk.supabase.co'
+)
+  .trim()
+  .replace(/\/+$/, '');
+
+const SUPABASE_KEY = (
+  process.env.SUPABASE_SERVICE_ROLE_KEY ||
+  process.env.SUPABASE_ANON_KEY ||
+  process.env.SUPABASE_KEY ||
+  process.env.VITE_SUPABASE_ANON_KEY ||
+  process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY ||
+  'sb_publishable_azGR9nlfXHPOYc_8tzTvog_dvmoZ9Xc'
+).trim();
+
+function isSupabaseConfigured(): boolean {
+  return Boolean(SUPABASE_URL && SUPABASE_KEY);
+}
+
+function getSupabaseHeaders(
+  extra: Record<string, string> = {}
+): Record<string, string> {
+  const headers: Record<string, string> = {
+    apikey: SUPABASE_KEY,
+    ...extra,
+  };
+  if (SUPABASE_KEY.startsWith('eyJ')) {
+    headers.Authorization = `Bearer ${SUPABASE_KEY}`;
+  }
+  return headers;
+}
+
 // XAMPP MySQL / MariaDB Configuration
 const MYSQL_CONFIG = {
   host: process.env.DB_HOST || '127.0.0.1',
@@ -238,6 +274,147 @@ async function insertSurveyToMySql(
       new Date(survey.createdAt || Date.now()),
     ]
   );
+}
+
+async function supabaseUpsertRecord(rec: PtspRecord): Promise<void> {
+  if (!isSupabaseConfigured()) return;
+  const serviceText = rec.serviceTypes
+    .map((s) => PTSP_SERVICE_TYPE_LABELS[s] || s)
+    .join(', ');
+  const payload = {
+    id: rec.id,
+    registration_number: rec.registrationNumber,
+    received_date: rec.receivedDate || rec.dayAndDate,
+    full_name: rec.fullName,
+    nik_or_identity: rec.nikOrIdentity,
+    institution: rec.institution || '',
+    phone: rec.phoneWhatsapp || '',
+    email: rec.email || '',
+    service_types: serviceText,
+    purpose_summary: rec.purposeSummary || '',
+    completion_status: rec.completionStatus,
+    ptsp_officer_name: rec.ptspOfficerName || '',
+    handling_unit: rec.handlingUnit || '',
+    record_json: rec,
+    created_at: new Date(rec.createdAt || Date.now()).toISOString(),
+  };
+
+  const res = await fetch(`${SUPABASE_URL}/rest/v1/ptsp_records?on_conflict=id`, {
+    method: 'POST',
+    headers: getSupabaseHeaders({
+      'Content-Type': 'application/json',
+      Prefer: 'resolution=merge-duplicates,return=minimal',
+    }),
+    body: JSON.stringify(payload),
+  });
+  if (!res.ok) {
+    throw new Error(`Supabase upsert ptsp_records failed (${res.status}): ${await res.text()}`);
+  }
+}
+
+async function supabaseFetchRecords(): Promise<PtspRecord[] | null> {
+  if (!isSupabaseConfigured()) return null;
+  const res = await fetch(
+    `${SUPABASE_URL}/rest/v1/ptsp_records?select=record_json&order=created_at.desc`,
+    {
+      headers: getSupabaseHeaders(),
+    }
+  );
+  if (!res.ok) {
+    throw new Error(`Supabase fetch ptsp_records failed (${res.status}): ${await res.text()}`);
+  }
+  const rows = (await res.json()) as Array<{ record_json: PtspRecord | string }>;
+  if (rows.length === 0) {
+    for (const rec of store.ptspRecords) {
+      await supabaseUpsertRecord(rec);
+    }
+    return store.ptspRecords;
+  }
+  return rows.map((r) =>
+    typeof r.record_json === 'string'
+      ? (JSON.parse(r.record_json) as PtspRecord)
+      : r.record_json
+  );
+}
+
+async function supabaseUpsertSurvey(survey: PtspSurveyEntry): Promise<void> {
+  if (!isSupabaseConfigured()) return;
+  const payload = {
+    id: survey.id,
+    respondent_name: survey.respondentName,
+    survey_date: survey.surveyDate,
+    service_type: survey.serviceType,
+    overall_satisfaction: survey.overallSatisfaction,
+    q1_prosedur: survey.surveyScores.q1_prosedur,
+    q2_persyaratan: survey.surveyScores.q2_persyaratan,
+    q3_kecepatan: survey.surveyScores.q3_kecepatan,
+    q4_kompetensi: survey.surveyScores.q4_kompetensi,
+    q5_sikap: survey.surveyScores.q5_sikap,
+    q6_kesesuaian: survey.surveyScores.q6_kesesuaian,
+    q7_sarana: survey.surveyScores.q7_sarana,
+    q8_pengaduan: survey.surveyScores.q8_pengaduan,
+    survey_feedback: survey.surveyFeedback || '',
+    survey_json: survey,
+    created_at: new Date(survey.createdAt || Date.now()).toISOString(),
+  };
+
+  const res = await fetch(`${SUPABASE_URL}/rest/v1/ptsp_surveys?on_conflict=id`, {
+    method: 'POST',
+    headers: getSupabaseHeaders({
+      'Content-Type': 'application/json',
+      Prefer: 'resolution=merge-duplicates,return=minimal',
+    }),
+    body: JSON.stringify(payload),
+  });
+  if (!res.ok) {
+    throw new Error(`Supabase upsert ptsp_surveys failed (${res.status}): ${await res.text()}`);
+  }
+}
+
+async function supabaseFetchSurveys(): Promise<PtspSurveyEntry[] | null> {
+  if (!isSupabaseConfigured()) return null;
+  const res = await fetch(
+    `${SUPABASE_URL}/rest/v1/ptsp_surveys?select=survey_json&order=created_at.desc`,
+    {
+      headers: getSupabaseHeaders(),
+    }
+  );
+  if (!res.ok) {
+    throw new Error(`Supabase fetch ptsp_surveys failed (${res.status}): ${await res.text()}`);
+  }
+  const rows = (await res.json()) as Array<{ survey_json: PtspSurveyEntry | string }>;
+  if (rows.length === 0) {
+    for (const srv of store.ptspSurveys) {
+      await supabaseUpsertSurvey(srv);
+    }
+    return store.ptspSurveys;
+  }
+  return rows.map((r) =>
+    typeof r.survey_json === 'string'
+      ? (JSON.parse(r.survey_json) as PtspSurveyEntry)
+      : r.survey_json
+  );
+}
+
+async function initSupabase(): Promise<void> {
+  if (!isSupabaseConfigured()) return;
+  try {
+    const [records, surveys] = await Promise.all([
+      supabaseFetchRecords(),
+      supabaseFetchSurveys(),
+    ]);
+    if (records) store.ptspRecords = records;
+    if (surveys) store.ptspSurveys = surveys;
+    saveStore(store);
+    console.log(
+      `[Supabase Cloud] Terhubung ke ${SUPABASE_URL} (${store.ptspRecords.length} berkas PTSP, ${store.ptspSurveys.length} survei SKM tersinkronisasi).`
+    );
+  } catch (err) {
+    console.error(
+      `[Supabase Cloud] Gagal menyinkronkan tabel Supabase (pastikan supabase_schema.sql sudah dijalankan di SQL Editor Supabase):`,
+      (err as Error)?.message || err
+    );
+  }
 }
 
 async function initXamppMySql(): Promise<Pool | null> {
@@ -432,6 +609,7 @@ async function startServer() {
   const app = express();
   const PORT = 3000;
 
+  void initSupabase();
   void initXamppMySql();
 
   app.use(express.json({ limit: '5mb' }));
@@ -610,9 +788,23 @@ async function startServer() {
     }
   );
 
-  // --- PTSP RECORDS & SURVEYS API ROUTES (XAMPP MYSQL + LOCAL FALLBACK) ---
+  // --- PTSP RECORDS & SURVEYS API ROUTES (SUPABASE CLOUD -> XAMPP MYSQL -> LOCAL JSON) ---
 
   app.get('/api/ptsp/records', async (_req: Request, res: Response) => {
+    if (isSupabaseConfigured()) {
+      try {
+        const records = await supabaseFetchRecords();
+        if (records) {
+          store.ptspRecords = records;
+          saveStore(store);
+          res.json({ records, storage: 'supabase' });
+          return;
+        }
+      } catch (err) {
+        console.error('Supabase read records error:', err);
+      }
+    }
+
     const pool = mysqlPool || (await initXamppMySql());
     if (pool) {
       try {
@@ -645,6 +837,14 @@ async function startServer() {
     ];
     saveStore(store);
 
+    if (isSupabaseConfigured()) {
+      try {
+        await supabaseUpsertRecord(incoming);
+      } catch (err) {
+        console.error('Supabase insert record error:', err);
+      }
+    }
+
     const pool = mysqlPool || (await initXamppMySql());
     if (pool) {
       try {
@@ -673,6 +873,14 @@ async function startServer() {
     }
     saveStore(store);
 
+    if (isSupabaseConfigured()) {
+      try {
+        await supabaseUpsertRecord(updated);
+      } catch (err) {
+        console.error('Supabase update record error:', err);
+      }
+    }
+
     const pool = mysqlPool || (await initXamppMySql());
     if (pool) {
       try {
@@ -686,6 +894,20 @@ async function startServer() {
   });
 
   app.get('/api/ptsp/surveys', async (_req: Request, res: Response) => {
+    if (isSupabaseConfigured()) {
+      try {
+        const surveys = await supabaseFetchSurveys();
+        if (surveys) {
+          store.ptspSurveys = surveys;
+          saveStore(store);
+          res.json({ surveys, storage: 'supabase' });
+          return;
+        }
+      } catch (err) {
+        console.error('Supabase read surveys error:', err);
+      }
+    }
+
     const pool = mysqlPool || (await initXamppMySql());
     if (pool) {
       try {
@@ -717,6 +939,14 @@ async function startServer() {
       ...store.ptspSurveys.filter((s) => s.id !== incoming.id),
     ];
     saveStore(store);
+
+    if (isSupabaseConfigured()) {
+      try {
+        await supabaseUpsertSurvey(incoming);
+      } catch (err) {
+        console.error('Supabase insert survey error:', err);
+      }
+    }
 
     const pool = mysqlPool || (await initXamppMySql());
     if (pool) {

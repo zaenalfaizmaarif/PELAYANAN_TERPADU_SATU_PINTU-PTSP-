@@ -600,9 +600,16 @@ export default function App() {
                   <span className="truncate">Verifikasi Petugas</span>
                 </span>
                 {authenticatedOfficer ? (
-                  <span className="text-[11px] font-mono tabular-nums font-bold px-2 py-0.5 rounded-full bg-amber-100 text-amber-900 border border-amber-300/70 shrink-0">
-                    {ptspRecords.length}
-                  </span>
+                  (() => {
+                    const pendingCount = ptspRecords.filter(
+                      (r) => r.completionStatus === 'menunggu_verifikasi'
+                    ).length;
+                    return pendingCount > 0 ? (
+                      <span className="text-[11px] font-mono tabular-nums font-bold px-2 py-0.5 rounded-full bg-amber-100 text-amber-900 border border-amber-300/70 shrink-0">
+                        {pendingCount}
+                      </span>
+                    ) : null;
+                  })()
                 ) : (
                   <Lock className="w-3 h-3 text-slate-300 shrink-0" />
                 )}
